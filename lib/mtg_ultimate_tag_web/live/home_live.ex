@@ -3,24 +3,58 @@ defmodule MtgUltimateTagWeb.HomeLive do
   use MtgUltimateTagWeb, :live_view
 
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, cards: [], error: nil, url: "", loading: false)}
+    {:ok,
+     assign(socket,
+       cards: [],
+       error: nil,
+       url: "",
+       loading: false,
+       progress: %{current: nil, index: 0, total: 0}
+     )}
   end
 
   # ça fetch
   def handle_event("submit", %{"url" => url}, socket) do
     # Met à jour immédiatement le front avec loading
     send(self(), {:fetch_cards, url})
-    {:noreply, assign(socket, loading: true, cards: [], error: nil)}
+
+    {:noreply,
+     assign(socket,
+       progress: %{current: nil, index: 0, total: 100},
+       cards: [],
+       loading: true,
+       error: nil
+     )}
   end
 
   def handle_info({:fetch_cards, url}, socket) do
-    case Cards.get_list(url) do
-      {:ok, cards} ->
-        {:noreply, assign(socket, cards: cards, error: nil, loading: false)}
+    self_pid = self()
 
-      {:error, _} ->
-        {:noreply, assign(socket, cards: [], error: "Deck introuvable", loading: false)}
-    end
+    Task.start(fn ->
+      callback = fn name, index, total ->
+        send(self_pid, {:progress_update, name, index, total})
+      end
+
+      case Cards.get_list(url, callback) do
+        {:ok, cards} -> send(self_pid, {:cards_loaded, cards})
+        {:error, _} -> send(self_pid, {:cards_error})
+      end
+    end)
+
+    {:noreply, socket}
+  end
+
+  def handle_info({:progress_update, name, index, total}, socket) do
+    {:noreply, assign(socket, progress: %{current: name, index: index, total: total})}
+  end
+
+  def handle_info({:cards_loaded, cards}, socket) do
+    {:noreply,
+     assign(socket,
+       cards: cards,
+       loading: false,
+       progress: %{current: nil, index: 0, total: 0}
+     )}
   end
 
   def render(assigns) do
@@ -46,17 +80,49 @@ defmodule MtgUltimateTagWeb.HomeLive do
       </form>
 
       <%= if @loading do %>
-        <div class="flex items-center justify-center gap-2 mt-6 text-sm text-indigo-600">
-          <svg
-            class="animate-spin h-5 w-5"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-          </svg>
-          <span class="italic">Invocation du deck...</span>
+        <div class="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center">
+          <div class="bg-white p-6 rounded-xl shadow-xl w-full max-w-sm text-center animate-fade-in">
+            <div class="flex items-center justify-center gap-2 mt-6 text-sm text-indigo-600">
+              <svg
+                class="animate-spin h-5 w-5"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                />
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+              </svg>
+              <span class="italic">Invocation du deck...</span>
+            </div>
+
+            <p class="text-indigo-600 font-bold mb-4">{@progress.current || "..."}</p>
+
+            <% percent =
+              if @progress.total > 0 do
+                Float.round(@progress.index / @progress.total * 100, 0)
+              else
+                0
+              end %>
+
+            <div class="w-full h-4 bg-gray-200 rounded-full overflow-hidden mb-2">
+              <div
+                class="h-full bg-indigo-500 transition-all duration-300 ease-out"
+                style={"width: #{percent}%"}
+              >
+              </div>
+            </div>
+
+            <p class="text-sm text-gray-500 tracking-wide">
+              {@progress.index} / {@progress.total} cartes
+            </p>
+          </div>
         </div>
       <% end %>
 
