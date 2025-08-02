@@ -7,15 +7,17 @@ defmodule MtgUltimateTag.Moxfield do
   @api_base "https://api.moxfield.com/v2/decks/all"
 
   # Search deck
-  @spec fetch_deck_from_url(binary()) ::
-          {:error, {:error, :not_found | {any(), any()} | map()}} | {:ok, {map(), list()}}
   def fetch_deck_from_url(url) do
     with {:ok, deck_id} <- extract_deck_id(url),
          {:ok, deck_data} <- fetch_deck_json(deck_id),
+         {:ok, commanders} <- get_commanders_from_json(deck_data),
          {:ok, cards} <- get_card_names_from_json(deck_data) do
+      IO.inspect(deck_data)
+
       deck = %MtgUltimateTag.Deck{
         id: deck_id,
-        name: deck_data["name"]
+        name: deck_data["name"],
+        commanders: commanders
       }
 
       {:ok, {deck, cards}}
@@ -63,5 +65,16 @@ defmodule MtgUltimateTag.Moxfield do
     names = Map.keys(mainboard)
     # On retourne juste les noms
     {:ok, names}
+  end
+
+  # Extrait les commandants depuis le JSON
+  def get_commanders_from_json(%{"commanders" => commanders}) do
+    commanders_list =
+      commanders
+      |> Enum.map(fn {name, %{"card" => %{"id" => id}}} ->
+        %{id: id, name: name}
+      end)
+
+    {:ok, commanders_list}
   end
 end

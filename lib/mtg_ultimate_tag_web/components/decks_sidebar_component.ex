@@ -6,17 +6,26 @@ defmodule MtgUltimateTagWeb.DeckSidebarComponent do
   """
   def deck_sidebar(assigns) do
     ~H"""
-    <aside class="w-24 bg-gray-100 h-screen fixed left-0 top-0 flex flex-col items-center pt-6 space-y-4">
+    <aside class="group w-28 hover:w-96 bg-gray-100 h-screen fixed left-0 top-0 flex flex-col pt-4 space-y-4 transition-all duration-300 overflow-hidden items-center hover:items-start">
       <%= for deck <- @decks do %>
-        <div class="group relative w-16 h-24 overflow-hidden rounded shadow-md cursor-pointer transition duration-300 hover:w-64 hover:h-36 hover:z-10 hover:shadow-xl">
-          <img
-            src={deck.image_url}
-            alt={deck.name}
-            class="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
-          />
-
-          <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white text-sm text-center py-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            {deck.name}
+        <div class="flex items-center space-x-3 px-4 w-full cursor-pointer transition-all duration-300 group-hover:pr-6">
+          <!-- Cercle parfaitement centré avec marges égales -->
+          <div class="w-20 h-20 rounded-full overflow-hidden border border-gray-300 shadow-sm flex-shrink-0">
+            <img
+              src={
+                case Enum.at(deck["commanders"] || [], 0) do
+                  %{"id" => id} -> "https://assets.moxfield.net/cards/card-#{id}-normal.webp"
+                  _ -> "/images/fallback.jpg"
+                end
+              }
+              alt={deck["name"]}
+              class="object-cover object-top w-full h-full transform scale-[1.65] translate-y-[5%]"
+            />
+          </div>
+          
+    <!-- Nom du deck (visible seulement quand élargi) -->
+          <div class="text-sm font-medium text-gray-800 opacity-0 group-hover:opacity-100 transition-opacity truncate">
+            {deck["name"]}
           </div>
         </div>
       <% end %>

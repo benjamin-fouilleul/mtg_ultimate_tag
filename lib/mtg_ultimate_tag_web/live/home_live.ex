@@ -61,7 +61,7 @@ defmodule MtgUltimateTagWeb.HomeLive do
 
   def render(assigns) do
     ~H"""
-    <div class="p-10 max-w-2xl mx-auto">
+    <div class="py-20 p-10 max-w-2xl mx-auto">
       <h1 class="text-4xl font-bold mb-4 text-center">MTG Ultimate Tag</h1>
       <p class="text-lg text-gray-600 mb-8 text-center">
         Structure your deck using tags provided by Scryfall tagger.
@@ -129,20 +129,13 @@ defmodule MtgUltimateTagWeb.HomeLive do
       <% end %>
 
       <%= if Enum.any?(@cards) do %>
-        <p class="text-lg mt-8 mb-2">{@deck.name}</p>
-        <div class="mt-8 space-y-6">
-          <%= for card <- @cards do %>
-            <div class="bg-white p-4 rounded-xl shadow flex flex-col gap-2">
-              <p class="font-semibold text-lg text-gray-800">{card.name}</p>
-              <div class="flex flex-wrap gap-2">
-                <%= for tag <- card.tags do %>
-                  <span class="bg-indigo-100 text-indigo-700 text-sm px-3 py-1 rounded-full">
-                    {tag}
-                  </span>
-                <% end %>
-              </div>
-            </div>
-          <% end %>
+        <div
+          id="persistence"
+          phx-hook="Persistence"
+          data-deck={Jason.encode!(@deck)}
+          data-decks={Jason.encode!([@deck])}
+          data-cards={Jason.encode!(@cards)}
+        >
         </div>
       <% end %>
     </div>

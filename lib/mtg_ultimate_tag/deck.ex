@@ -2,12 +2,15 @@ defmodule MtgUltimateTag.Deck do
   @moduledoc """
   Représente un deck Magic
   """
+  alias MtgUltimateTag.Commander
 
-  @enforce_keys [:id, :name]
-  defstruct [:id, :name]
+  @derive {Jason.Encoder, only: [:id, :name, :commanders]}
+  @enforce_keys [:id, :name, :commanders]
+  defstruct [:id, :name, :commanders]
 
   @type t :: %__MODULE__{
           id: String.t(),
-          name: String.t()
+          name: String.t(),
+          commanders: [Commander.t()]
         }
 end

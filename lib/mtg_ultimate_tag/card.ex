@@ -3,6 +3,7 @@ defmodule MtgUltimateTag.Card do
   Représente une carte Magic avec les infos pertinentes pour l'affichage front.
   """
 
+  @derive {Jason.Encoder, only: [:id, :name, :set, :collector_number, :tags]}
   @enforce_keys [:id, :name, :set, :collector_number, :tags]
   defstruct [:id, :name, :set, :collector_number, :tags]
 
