@@ -7,6 +7,7 @@ defmodule MtgUltimateTagWeb.HomeLive do
      assign(socket,
        cards: [],
        deck: nil,
+       tags: [],
        error: nil,
        url: "",
        loading: false,
@@ -22,7 +23,6 @@ defmodule MtgUltimateTagWeb.HomeLive do
     {:noreply,
      assign(socket,
        progress: %{current: nil, index: 0, total: 100},
-       cards: [],
        loading: true,
        error: nil
      )}
@@ -37,7 +37,7 @@ defmodule MtgUltimateTagWeb.HomeLive do
       end
 
       case Decks.fetch_from_url(url, callback) do
-        {:ok, {deck, cards}} -> send(self_pid, {:cards_loaded, {deck, cards}})
+        {:ok, {deck, cards, tags}} -> send(self_pid, {:cards_loaded, {deck, cards, tags}})
         {:error, _} -> send(self_pid, {:cards_error})
       end
     end)
@@ -49,11 +49,12 @@ defmodule MtgUltimateTagWeb.HomeLive do
     {:noreply, assign(socket, progress: %{current: name, index: index, total: total})}
   end
 
-  def handle_info({:cards_loaded, {deck, cards}}, socket) do
+  def handle_info({:cards_loaded, {deck, cards, tags}}, socket) do
     {:noreply,
      assign(socket,
        cards: cards,
        deck: deck,
+       tags: tags,
        loading: false,
        progress: %{current: nil, index: 0, total: 0}
      )}
@@ -135,6 +136,7 @@ defmodule MtgUltimateTagWeb.HomeLive do
           data-deck={Jason.encode!(@deck)}
           data-decks={Jason.encode!([@deck])}
           data-cards={Jason.encode!(@cards)}
+          data-tags={Jason.encode!(@tags)}
         >
         </div>
       <% end %>
