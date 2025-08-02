@@ -1,18 +1,29 @@
-# MtgUltimateTag
+# 🧙‍♂️ Manage your Magic deck tags with the Scryfall Tagger
 
-To start your Phoenix server:
+This project helps you fetch and display card tags from a Moxfield deck using the community-powered [Scryfall Tagger](https://tagger.scryfall.com).
 
-  * Run `mix setup` to install and setup dependencies
-  * Start Phoenix endpoint with `mix phx.server` or inside IEx with `iex -S mix phx.server`
+Built with:
 
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
+- 🧪 **Elixir + Phoenix LiveView** for the main web app
+- ⚙️ **Node.js microservice** to scrape tags from the Scryfall Tagger UI
 
-Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
+---
 
-## Learn more
+## ✨ Features
 
-  * Official website: https://www.phoenixframework.org/
-  * Guides: https://hexdocs.pm/phoenix/overview.html
-  * Docs: https://hexdocs.pm/phoenix
-  * Forum: https://elixirforum.com/c/phoenix-forum
-  * Source: https://github.com/phoenixframework/phoenix
+- Paste your Moxfield deck URL
+- Cards are fetched via Moxfield's API
+- Metadata is enriched using the Scryfall API
+- Tags are scraped dynamically from [tagger.scryfall.com](https://tagger.scryfall.com)
+- All cards + tags are displayed cleanly
+
+---
+
+## 🚀 Setup
+
+### 1. Clone the repo
+
+```bash
+git clone git@github.com:your-user/mtg_ultimate_tag.git
+cd mtg_ultimate_tag
+```
