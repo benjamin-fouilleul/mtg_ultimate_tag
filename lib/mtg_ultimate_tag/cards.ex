@@ -2,30 +2,10 @@ defmodule MtgUltimateTag.Cards do
   @moduledoc """
   Contexte pour récupérer et enrichir les cartes Magic à partir d'un deck Moxfield.
   """
-
-  alias MtgUltimateTag.{Moxfield, Scryfall, ScryfallTagger}
+  alias MtgUltimateTag.ScryfallTagger
   alias MtgUltimateTag.Card
 
-  @type progress_callback :: (String.t(), non_neg_integer(), non_neg_integer() -> any())
-
-  @doc """
-  Récupère les cartes d'un deck Moxfield, enrichies avec les données Scryfall et les tags.
-
-  Peut accepter un callback pour suivre la progression (nom, index, total).
-  """
-  @spec get_list(String.t(), progress_callback()) :: {:ok, [Card.t()]} | {:error, term()}
-  def get_list(deck_url, progress_callback \\ fn _, _, _ -> :ok end) do
-    with {:ok, card_names} <- Moxfield.fetch_card_names_from_url(deck_url) do
-      card_names
-      |> Enum.chunk_every(75)
-      |> Enum.map(&Scryfall.get_cards_data/1)
-      |> fetch_tags(progress_callback)
-    else
-      error -> error
-    end
-  end
-
-  defp fetch_tags(results, progress_callback) do
+  def fetch_tags(results, progress_callback) do
     case Enum.reduce_while(results, {:ok, []}, fn
            {:ok, cards}, {:ok, acc} -> {:cont, {:ok, acc ++ cards}}
            {:error, _} = err, _acc -> {:halt, err}

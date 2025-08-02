@@ -18,6 +18,7 @@ defmodule MtgUltimateTagWeb.Router do
     pipe_through :browser
 
     live "/", HomeLive
+    live "/deck/:deck_id", DeckLive
   end
 
   # Other scopes may use custom stacks.

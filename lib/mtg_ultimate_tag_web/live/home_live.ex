@@ -1,11 +1,12 @@
 defmodule MtgUltimateTagWeb.HomeLive do
-  alias MtgUltimateTag.Cards
+  alias MtgUltimateTag.Decks
   use MtgUltimateTagWeb, :live_view
 
   def mount(_params, _session, socket) do
     {:ok,
      assign(socket,
        cards: [],
+       deck: nil,
        error: nil,
        url: "",
        loading: false,
@@ -35,8 +36,8 @@ defmodule MtgUltimateTagWeb.HomeLive do
         send(self_pid, {:progress_update, name, index, total})
       end
 
-      case Cards.get_list(url, callback) do
-        {:ok, cards} -> send(self_pid, {:cards_loaded, cards})
+      case Decks.fetch_from_url(url, callback) do
+        {:ok, {deck, cards}} -> send(self_pid, {:cards_loaded, {deck, cards}})
         {:error, _} -> send(self_pid, {:cards_error})
       end
     end)
@@ -48,10 +49,11 @@ defmodule MtgUltimateTagWeb.HomeLive do
     {:noreply, assign(socket, progress: %{current: name, index: index, total: total})}
   end
 
-  def handle_info({:cards_loaded, cards}, socket) do
+  def handle_info({:cards_loaded, {deck, cards}}, socket) do
     {:noreply,
      assign(socket,
        cards: cards,
+       deck: deck,
        loading: false,
        progress: %{current: nil, index: 0, total: 0}
      )}
@@ -59,10 +61,10 @@ defmodule MtgUltimateTagWeb.HomeLive do
 
   def render(assigns) do
     ~H"""
-    <div class="p-10 max-w-xl mx-auto">
+    <div class="p-10 max-w-2xl mx-auto">
       <h1 class="text-4xl font-bold mb-4 text-center">MTG Ultimate Tag</h1>
       <p class="text-lg text-gray-600 mb-8 text-center">
-        Fini les decks en vrac.<br /> Collez votre lien, on s’occupe du reste !
+        Structure your deck using tags provided by Scryfall tagger.
       </p>
 
       <form phx-submit="submit" class="flex gap-2 justify-center">
@@ -70,7 +72,7 @@ defmodule MtgUltimateTagWeb.HomeLive do
           type="text"
           name="url"
           value={@url}
-          placeholder="Collez le lien vers votre deck"
+          placeholder="Paste your Moxfield link"
           class="border border-gray-300 px-4 py-2 rounded w-full max-w-md"
         />
 
@@ -99,10 +101,10 @@ defmodule MtgUltimateTagWeb.HomeLive do
                 />
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
               </svg>
-              <span class="italic">Invocation du deck...</span>
+              <span class="italic">Resolving triggers...</span>
             </div>
 
-            <p class="text-indigo-600 font-bold mb-4">{@progress.current || "..."}</p>
+            <p class="text-indigo-600 font-bold mb-4 mt-2">{@progress.current || "..."}</p>
 
             <% percent =
               if @progress.total > 0 do
@@ -120,14 +122,14 @@ defmodule MtgUltimateTagWeb.HomeLive do
             </div>
 
             <p class="text-sm text-gray-500 tracking-wide">
-              {@progress.index} / {@progress.total} cartes
+              {@progress.index} / {@progress.total} cards
             </p>
           </div>
         </div>
       <% end %>
 
       <%= if Enum.any?(@cards) do %>
-        <p class="text-lg mt-8 mb-2">Cartes trouvées</p>
+        <p class="text-lg mt-8 mb-2">{@deck.name}</p>
         <div class="mt-8 space-y-6">
           <%= for card <- @cards do %>
             <div class="bg-white p-4 rounded-xl shadow flex flex-col gap-2">

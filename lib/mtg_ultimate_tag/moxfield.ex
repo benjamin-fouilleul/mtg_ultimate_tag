@@ -6,14 +6,20 @@ defmodule MtgUltimateTag.Moxfield do
   # URL de base pour accéder à l'API de Moxfield
   @api_base "https://api.moxfield.com/v2/decks/all"
 
-  # Fonction principale appelée depuis le front
-  def fetch_card_names_from_url(url) do
+  # Search deck
+  @spec fetch_deck_from_url(binary()) ::
+          {:error, {:error, :not_found | {any(), any()} | map()}} | {:ok, {map(), list()}}
+  def fetch_deck_from_url(url) do
     with {:ok, deck_id} <- extract_deck_id(url),
-         {:ok, json} <- fetch_deck_json(deck_id),
-         {:ok, card_names} <- get_card_names_from_json(json) do
-      {:ok, card_names}
+         {:ok, deck_data} <- fetch_deck_json(deck_id),
+         {:ok, cards} <- get_card_names_from_json(deck_data) do
+      deck = %MtgUltimateTag.Deck{
+        id: deck_id,
+        name: deck_data["name"]
+      }
+
+      {:ok, {deck, cards}}
     else
-      # Renvoie une erreur générique
       error -> {:error, error}
     end
   end
@@ -58,7 +64,4 @@ defmodule MtgUltimateTag.Moxfield do
     # On retourne juste les noms
     {:ok, names}
   end
-
-  # Pas le bon format
-  defp get_card_names_from_json(_), do: {:error, :invalid_json}
 end

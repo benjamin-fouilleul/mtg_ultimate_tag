@@ -7,7 +7,7 @@ defmodule MtgUltimateTag.CardsTest do
   @deck_url "https://moxfield.com/decks/QYiCA1lnwEeQVXp_9W6D2g"
 
   test "get_list/1 returns enriched cards from Moxfield deck" do
-    result = Cards.get_list(@deck_url)
+    result = Cards.fetch_list_from_url(@deck_url)
 
     assert {:ok, cards} = result
     assert is_list(cards)
