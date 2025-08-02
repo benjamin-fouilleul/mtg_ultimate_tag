@@ -41,7 +41,10 @@ app.get("/tags", async (req, res) => {
           const links = Array.from(current.querySelectorAll("a"));
           links.forEach(link => {
             const text = link.textContent.trim();
-            if (text) allTags.push(text);
+            console.log(text)
+            if (text && !/^[A-ZÀ-ÖØ-Ý]/.test(text)) {
+              allTags.push(text);
+            }
           });
         }
 

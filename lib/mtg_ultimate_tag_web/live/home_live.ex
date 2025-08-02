@@ -82,7 +82,7 @@ defmodule MtgUltimateTagWeb.HomeLive do
       <%= if @loading do %>
         <div class="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center">
           <div class="bg-white p-6 rounded-xl shadow-xl w-full max-w-sm text-center animate-fade-in">
-            <div class="flex items-center justify-center gap-2 mt-6 text-sm text-indigo-600">
+            <div class="flex items-center justify-center gap-2 text-sm text-indigo-600">
               <svg
                 class="animate-spin h-5 w-5"
                 xmlns="http://www.w3.org/2000/svg"
@@ -128,11 +128,20 @@ defmodule MtgUltimateTagWeb.HomeLive do
 
       <%= if Enum.any?(@cards) do %>
         <p class="text-lg mt-8 mb-2">Cartes trouvées</p>
-        <ul class="list-disc ml-6">
+        <div class="mt-8 space-y-6">
           <%= for card <- @cards do %>
-            <li class="text-gray-600">{card.name}</li>
+            <div class="bg-white p-4 rounded-xl shadow flex flex-col gap-2">
+              <p class="font-semibold text-lg text-gray-800">{card.name}</p>
+              <div class="flex flex-wrap gap-2">
+                <%= for tag <- card.tags do %>
+                  <span class="bg-indigo-100 text-indigo-700 text-sm px-3 py-1 rounded-full">
+                    {tag}
+                  </span>
+                <% end %>
+              </div>
+            </div>
           <% end %>
-        </ul>
+        </div>
       <% end %>
     </div>
     """

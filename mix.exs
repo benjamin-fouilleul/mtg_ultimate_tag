@@ -35,7 +35,7 @@ defmodule MtgUltimateTag.MixProject do
       # Customer adds
       {:floki, "~> 0.35"},
       {:httpoison, "~> 2.2"},
-      {:dotenv_parser, "~> 2.0", only: :dev},
+      {:dotenv_parser, "~> 2.0"},
 
       # Default installation
       {:phoenix, "~> 1.7.21"},
